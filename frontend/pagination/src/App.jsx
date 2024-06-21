@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import ReactPaginate from "react-paginate";
+import "./App.css"; // Import the CSS file
 
 const App = () => {
   const [data, setData] = useState([]);
@@ -7,8 +9,14 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const handlePageClick = (e) => {
+    const selectedPage = e.selected + 1;
+    setPage(selectedPage);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await fetch(
           `http://localhost:5000?page=${page}&limit=4`
@@ -17,7 +25,6 @@ const App = () => {
           throw new Error("Network response was not ok");
         }
         const result = await response.json();
-        console.log(result);
         setData(result.result);
         setTotalPages(result.totalPages);
       } catch (error) {
@@ -27,7 +34,7 @@ const App = () => {
       }
     };
 
-    fetchData(page);
+    fetchData();
   }, [page]);
 
   return (
@@ -44,23 +51,26 @@ const App = () => {
               <h4>{product.name}</h4>
             </div>
           ))}
-          <div>
-            <button
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              disabled={page === 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={page === totalPages}
-            >
-              Next
-            </button>
-          </div>
+          <ReactPaginate
+            breakLabel="..."
+            nextLabel="next >"
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={5}
+            pageCount={totalPages}
+            previousLabel="< previous"
+            renderOnZeroPageCount={null}
+            forcePage={page - 1}
+            containerClassName="pagination"
+            pageClassName="page-item"
+            pageLinkClassName="page-link"
+            previousClassName="page-item"
+            previousLinkClassName="page-link"
+            nextClassName="page-item"
+            nextLinkClassName="page-link"
+            breakClassName="page-item"
+            breakLinkClassName="page-link"
+            activeClassName="active"
+          />
         </>
       )}
     </>
